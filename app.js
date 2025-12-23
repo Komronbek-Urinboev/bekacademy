@@ -1,25 +1,36 @@
 const tg = window.Telegram.WebApp;
 
-document.getElementById("registerBtn").onclick = () => {
-  const user = tg.initDataUnsafe.user;
+// Инициализация Web App
+tg.ready();
 
-  if (!user) {
-    alert("Откройте сайт через Telegram");
+document.getElementById("registerBtn").addEventListener("click", () => {
+  // Проверка, что сайт открыт через Telegram
+  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+    alert("Пожалуйста, откройте регистрацию через Telegram-бота");
     return;
   }
 
+  const user = tg.initDataUnsafe.user;
+
+  // Формируем данные пользователя
   const payload = {
     id: user.id,
-    username: user.username || "",
-    first_name: user.first_name || "",
-    last_name: user.last_name || "",
-    language: user.language_code || "",
+    username: user.username || null,
+    first_name: user.first_name || null,
+    last_name: user.last_name || null,
+    language_code: user.language_code || null,
     registered_at: new Date().toISOString()
   };
 
-  tg.sendData(JSON.stringify(payload));
+  try {
+    // Отправляем данные в бота
+    tg.sendData(JSON.stringify(payload));
 
-  setTimeout(() => {
-    window.location.href = "https://app-bekacademy.figma.site";
-  }, 700);
-};
+    // Закрываем Web App (ОБЯЗАТЕЛЬНО)
+    tg.close();
+
+  } catch (e) {
+    alert("Ошибка регистрации. Попробуйте ещё раз.");
+    console.error(e);
+  }
+});
